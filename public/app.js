@@ -23,7 +23,6 @@ $(document).on("click", "p", function() {
   $("#notes").empty();
   // Save the id from the p tag
   var thisId = $(this).attr("id");
-  console.log(thisId);
 
   // Now make an ajax call for the Article
   $.ajax({
@@ -92,3 +91,4 @@ $(document).on("click", "#savenote", function() {
   $("#bodyinput").val("");
   $("#summaryinput").val("");
 });
+//Note:  The article gets scraped and the id, title and summaries will appear.  If you click on any part of the article, the note form will appear.  The save and delete buttons don't work yet, and I did not attempt to deploy to Heroku without it working properly.  If I can get it working, then I will attempt Heroku.  I know the file structure isn't quite how I would have liked it to be, but I had issues when I made folders and I eventually just jettisoned them so it would work again...
