@@ -1,8 +1,9 @@
+//Require Dependencies
 var express = require("express");
 var bodyParser = require("body-parser");
 var logger = require("morgan");
 var mongoose = require("mongoose");
-var exHandle = require("express-handlebars");
+var exphbs = require("express-handlebars");
 var request = require("request");
 
 // Scraping Tools
@@ -12,8 +13,11 @@ var cheerio = require("cheerio");
 // Require All Models
 var db = require("./models");
 
+// Require Routes
+var routes = require("./controllers/controller.js");
+
 //Port
-var PORT = 3000;
+var PORT = process.env.PORT || 3000;
 
 // Initialize Express
 var app = express();
@@ -23,14 +27,31 @@ var app = express();
 // Use morgan For Logging Requests
 app.use(logger("dev"));
 
+// Designate Public Folder As Static Directory
+// app.use(express.static(__dirname + "/public"));
+
 // Use body-parser For Handling Form Submissions
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // Serve Public Folder As Static Directory
 app.use(express.static("public"));
 
+app.engine(
+  "handlebars",
+  exphbs({ defaultLayout: "main", layoutsDir: __dirname + "/views/layout" })
+);
+app.set("view engine", "handlebars");
+
 // Connect to Mongo DB
 mongoose.connect("mongodb://localhost/scraperdb");
+// db.on("error", function(err) {
+//   console.log("Mongoose Error: ", err);
+// });
+
+// db.once("open", function() {
+//   console.log("Mongoose connection successful.");
+// });
 
 // Routes
 
@@ -40,24 +61,35 @@ app.get("/scrape", function(req, res) {
   axios.get("http://www.newscow.net/").then(function(response) {
     // Load Into Cheerio and Save to $ for Shorthand Selector
     var $ = cheerio.load(response.data);
+
     // Grab Every h3 Within Article Tag:
-    $("article h3").each(function(i, element) {
+    $("article.content-list").each(function(i, element) {
       // Save an empty result object
       var result = {};
 
       // Add Text and href of Every Link
       result.title = $(this)
+        .children("header")
+        .children("h3")
         .children("a")
         .text();
       result.link = $(this)
+        .children("header")
+        .children("h3")
         .children("a")
         .attr("href");
+      result.summary = $(this)
+        .children(".content-list-excerpt")
+        .children("p")
+        .text();
 
-      // Create New Article using the `result` object built from scraping
+      console.log(result);
+
+      //Create New Article using the `result` object built from scraping
       db.Article.create(result)
         .then(function(dbArticle) {
           // View the added result in the console
-          console.log(dbArticle);
+          //   console.log(dbArticle);
         })
         .catch(function(err) {
           // If an error occurred, send it to the client
@@ -71,16 +103,23 @@ app.get("/scrape", function(req, res) {
 });
 
 // Route for Getting All Articles From db
-app.get("/articles", function(req, res) {
+app.get("/", function(req, res) {
   // Grab Every Document in Articles Collection
   db.Article.find({})
     .then(function(dbArticle) {
+      var hbsObject = {
+        article: dbArticle
+      };
+      //   console.log("hbsObject", hbsObject);
+
       // If Successfully Find Articles, Send Them Back to Client
-      res.json(dbArticle);
+      //   console.log(dbArticle);
+
+      res.render("index", hbsObject);
     })
     .catch(function(err) {
       // If Error Occurred, Send To Client
-      res.json(err);
+      res.json("error");
     });
 });
 
@@ -92,6 +131,7 @@ app.get("/articles/:id", function(req, res) {
     .populate("note")
     .then(function(dbArticle) {
       // If Find Article With id, Send To Client
+      console.log(dbArticle);
       res.json(dbArticle);
     })
     .catch(function(err) {
@@ -123,17 +163,17 @@ app.post("/articles/:id", function(req, res) {
       res.json(err);
     });
   // //Save Notes of Article From MongoDB
-  //     app.post("/save", function (req, res){
-  //      ?.save(req.body, function(data){
-  //          res.json(data);
-  //      });
-  //     });
-  //     //Delete Notes of Article From MongoDB
-  //     app.delete("/delete", function (req, res){
-  //      ?.delete (req.body, function(data){
-  //          res.json(data);
-  //      });
-  //     });
+  app.post("/save", function(req, res) {
+    note.save(req.body, function(data) {
+      res.json(data);
+    });
+  });
+  //Delete Notes of Article From MongoDB
+  app.delete("/delete", function(req, res) {
+    note.delete(req.body, function(data) {
+      res.json(data);
+    });
+  });
 });
 
 // Start the server

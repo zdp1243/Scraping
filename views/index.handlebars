@@ -26,22 +26,28 @@
         }
 
         #wrapper {
-            width: 1000px;
+            width: 1200px;
             margin-left: auto;
             margin-right: auto;
-            padding-top: 5%;
+            padding-top: .5%;
         }
 
         #articles {
             display: inline-block;
             overflow: auto;
             width: 60%;
-            height: 700px;
+            height: 1200px;
+            font-size: 1.2em;
+            color: rgb(240, 83, 10);
+            text-shadow: black 2px 2px;
         }
 
         #notes {
             float: right;
-            width: 30%;
+            width: 40%;
+            font-size: 1.2em;
+            color: rgb(240, 83, 10);
+            text-shadow: black 2px 2px;
         }
 
         textarea,
@@ -65,12 +71,30 @@
 
 <body>
     <div id="wrapper">
-        <h1>Note Scraper</h1>
+        <h1>Scrape Saver</h1>
         <h2>
             <i>Scraping the NewsCow...Like Butter Wouldn't Melt</i>
         </h2>
-        <div id="articles"></div>
-        <div id="notes"></div>
+
+
+        <div id="articles">
+            <h4>Save the Articles You Scrape!</h4>
+            <ul>
+                {{#each article}}
+                <li>
+                    <p id="{{this.id}}">ID: {{this.id}}</p>
+                    <p>Title: {{this.title}}</p>
+                    <p>Summary: {{this.summary}}</p>
+                    <p>Link: {{this.link}}</p>
+                </li>
+                {{/each}}
+            </ul>
+
+
+        </div>
+        <div id="notes">
+            <h4>Note Scraper</h4>
+        </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     <script src="app.js"></script>

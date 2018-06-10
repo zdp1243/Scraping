@@ -1,26 +1,29 @@
 // Grab the articles as a json
-$.getJSON("/articles", function(data) {
-  // For each one
-  for (var i = 0; i < data.length; i++) {
-    // Display the apropos information on the page
-    $("#articles").append(
-      "<p data-id='" +
-        data[i]._id +
-        "'>" +
-        data[i].title +
-        "<br />" +
-        data[i].link +
-        "</p>"
-    );
-  }
-});
+// $.getJSON("/", function(data) {
+//   // For each one
+//   for (var i = 0; i < data.length; i++) {
+//     // Display the apropos information on the page
+//     $("#articles").append(
+//       "<p data-id='" +
+//         data[i]._id +
+//         "'>" +
+//         data[i].title +
+//         "<br />" +
+//         data[i].summary +
+//         "<br/>" +
+//         data[i].link +
+//         "</p>"
+//     );
+//   }
+// });
 
 // Whenever someone clicks a p tag
 $(document).on("click", "p", function() {
   // Empty the notes from the note section
   $("#notes").empty();
   // Save the id from the p tag
-  var thisId = $(this).attr("data-id");
+  var thisId = $(this).attr("id");
+  console.log(thisId);
 
   // Now make an ajax call for the Article
   $.ajax({
@@ -40,6 +43,11 @@ $(document).on("click", "p", function() {
       $("#notes").append(
         "<button data-id='" + data._id + "' id='savenote'>Save Note</button>"
       );
+      $("#notes").append(
+        "<button data-id='" +
+          data._id +
+          "' id='deletenote'>Delete Note</button>"
+      );
 
       // If there's a note in the article
       if (data.note) {
@@ -47,6 +55,8 @@ $(document).on("click", "p", function() {
         $("#titleinput").val(data.note.title);
         // Place the body of the note in the body textarea
         $("#bodyinput").val(data.note.body);
+        // Place the summary of the note in the body text area
+        $("#summaryinput").val(data.note.summary);
       }
     });
 });
@@ -63,6 +73,8 @@ $(document).on("click", "#savenote", function() {
     data: {
       // Value taken from title input
       title: $("#titleinput").val(),
+      // Value taken from summary
+      summary: $("#summaryinput").val(),
       // Value taken from note textarea
       body: $("#bodyinput").val()
     }
@@ -78,4 +90,5 @@ $(document).on("click", "#savenote", function() {
   // Also, remove the values entered in the input and textarea for note entry
   $("#titleinput").val("");
   $("#bodyinput").val("");
+  $("#summaryinput").val("");
 });
